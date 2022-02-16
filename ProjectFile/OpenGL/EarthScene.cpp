@@ -17,6 +17,7 @@ EarthScene::EarthScene() {
 
 	earthModel = new Sphere(32, 16, 1.0f, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), CG_RIGHTHANDED);
 
+
 	// Instanciate the camera object with basic data
 	earthCamera = new Camera(camera_settings, glm::vec3(0.0, 0.0, 5.0));
 
@@ -24,9 +25,9 @@ EarthScene::EarthScene() {
 	// Setup textures for rendering the Earth model
 	//
 
-	dayTexture = TextureLoader::loadTexture(string("Resources\\Models\\Blue Marble\\land_ocean_ice_cloud_2048.bmp"), TextureGenProperties(GL_SRGB8_ALPHA8));
-	nightTexture = TextureLoader::loadTexture(string("Resources\\Models\\Blue Marble\\land_ocean_ice_lights_2048.bmp"), TextureGenProperties(GL_SRGB8_ALPHA8));
-	cloudMaskTexture = TextureLoader::loadTexture(string("Resources\\Models\\Blue Marble\\Clouds.bmp"));
+	dayTexture = TextureLoader::loadTexture(string("Resources\\Models\\Marbles\\Marble3.jpg"), TextureGenProperties(GL_SRGB8_ALPHA8));
+	nightTexture = TextureLoader::loadTexture(string("Resources\\Models\\Marbles\\Marble2.jpg"), TextureGenProperties(GL_SRGB8_ALPHA8));
+	cloudMaskTexture = TextureLoader::loadTexture(string("Resources\\Models\\Marbles\\Marble1.jpg"));
 
 
 	GLSL_ERROR glsl_err = ShaderLoader::createShaderProgram(
