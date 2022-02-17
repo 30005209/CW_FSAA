@@ -176,6 +176,17 @@ void processInput(GLFWwindow *window)
 
 		earthScene = new EarthScene(currentSetting);
 		earthQuad = new TexturedQuad(earthScene->getEarthSceneTexture(), true);
+
+		if (currentSetting > 0)
+		{
+			glEnable(GL_MULTISAMPLE);
+			glfwWindowHint(GLFW_SAMPLES, 4);
+		}
+		else
+		{
+			glDisable(GL_MULTISAMPLE);
+		}
+
 	}
 }
 

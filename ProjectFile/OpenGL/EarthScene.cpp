@@ -99,46 +99,145 @@ EarthScene::EarthScene(int type) {
 	// Note:  The texture is stored as linear RGB values (GL_RGBA8).  
 	//There is no need to pass a pointer to image data - 
 	//we're going to fill in the image when we render the Earth scene at render time!
-	glGenTextures(1, &fboColourTexture);
-	glBindTexture(GL_TEXTURE_2D, fboColourTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 800, 800, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	if (shaderType == 0)
+	{
+		glGenTextures(1, &fboColourTexture);
+		// Setup colour buffer texture.
+		// Note:  The texture is stored as linear RGB values (GL_RGBA8).  
+		//There is no need to pass a pointer to image data - 
+		//we're going to fill in the image when we render the Earth scene at render time!
+		glBindTexture(GL_TEXTURE_2D, fboColourTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 800, 800, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
-	// Setup depth texture
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	glGenTextures(1, &fboDepthTexture);
-	glBindTexture(GL_TEXTURE_2D, fboDepthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 800, 800, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+		// Setup depth texture
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glGenTextures(1, &fboDepthTexture);
+		glBindTexture(GL_TEXTURE_2D, fboDepthTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 800, 800, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
 
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	
+		// Attach textures to the FBO
+		//
+		
+		// Attach the colour texture object to the framebuffer object's colour attachment point #0
+		glFramebufferTexture2D(
+			GL_FRAMEBUFFER,
+			GL_COLOR_ATTACHMENT0,
+			GL_TEXTURE_2D,
+			fboColourTexture,
+			0);
 
-	//
-	// Attach textures to the FBO
-	//
+		// Attach the depth texture object to the framebuffer object's depth attachment point
+		glFramebufferTexture2D(
+			GL_FRAMEBUFFER,
+			GL_DEPTH_ATTACHMENT,
+			GL_TEXTURE_2D,
+			fboDepthTexture,
+			0);
 
-	// Attach the colour texture object to the framebuffer object's colour attachment point #0
-	glFramebufferTexture2D(
-		GL_FRAMEBUFFER,
-		GL_COLOR_ATTACHMENT0,
-		GL_TEXTURE_2D,
-		fboColourTexture,
-		0);
+	}
+	else if (shaderType == 1)
+	{
+		glGenTextures(1, &fboColourTexture);
+		// Setup colour buffer texture.
+		// Note:  The texture is stored as linear RGB values (GL_RGBA8).  
+		//There is no need to pass a pointer to image data - 
+		//we're going to fill in the image when we render the Earth scene at render time!
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, fboColourTexture);
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, 800, 800, GL_TRUE);
 
-	// Attach the depth texture object to the framebuffer object's depth attachment point
-	glFramebufferTexture2D(
-		GL_FRAMEBUFFER,
-		GL_DEPTH_ATTACHMENT,
-		GL_TEXTURE_2D,
-		fboDepthTexture,
-		0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		// Setup depth texture
+
+		glGenTextures(1, &fboDepthTexture);
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, fboDepthTexture);
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, 800, 800, GL_TRUE);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		// Attach textures to the FBO
+		//
+
+		// Attach the colour texture object to the framebuffer object's colour attachment point #0
+		glFramebufferTexture2D(
+			GL_FRAMEBUFFER,
+			GL_COLOR_ATTACHMENT0,
+			GL_TEXTURE_2D_MULTISAMPLE,
+			fboColourTexture,
+			0);
+
+		// Attach the depth texture object to the framebuffer object's depth attachment point
+		glFramebufferTexture2D(
+			GL_FRAMEBUFFER,
+			GL_DEPTH_ATTACHMENT,
+			GL_TEXTURE_2D_MULTISAMPLE,
+			fboDepthTexture,
+			0);
+
+	}
+	else
+	{
+		glGenTextures(1, &fboColourTexture);
+
+		// Setup colour buffer texture.
+		// Note:  The texture is stored as linear RGB values (GL_RGBA8).  
+		//There is no need to pass a pointer to image data - 
+		//we're going to fill in the image when we render the Earth scene at render time!
+		glBindTexture(GL_TEXTURE_2D, fboColourTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 800, 800, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		// Setup depth texture
+
+		glGenTextures(1, &fboDepthTexture);
+		glBindTexture(GL_TEXTURE_2D, fboDepthTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 800, 800, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		// Attach textures to the FBO
+		//
+
+		// Attach the colour texture object to the framebuffer object's colour attachment point #0
+		glFramebufferTexture2D(
+			GL_FRAMEBUFFER,
+			GL_COLOR_ATTACHMENT0,
+			GL_TEXTURE_2D,
+			fboColourTexture,
+			0);
+
+		// Attach the depth texture object to the framebuffer object's depth attachment point
+		glFramebufferTexture2D(
+			GL_FRAMEBUFFER,
+			GL_DEPTH_ATTACHMENT,
+			GL_TEXTURE_2D,
+			fboDepthTexture,
+			0);
+	}
 
 
 	//
@@ -297,7 +396,7 @@ void EarthScene::render() {
 				glBindTexture(GL_TEXTURE_2D, marbleTexture0);
 
 			if (i == 1)
-				glBindTexture(GL_TEXTURE_2D, marbleTexture1);
+				glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, marbleTexture1);
 
 			if (i == 2)
 				glBindTexture(GL_TEXTURE_2D, marbleTexture2);
