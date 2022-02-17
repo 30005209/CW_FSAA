@@ -136,6 +136,9 @@ int main()
 
 		glUseProgram(0);
 
+		string title = "FPS: " + std::to_string(timer.averageFPS()) + " SPF: " + std::to_string(timer.currentSPF());
+		glfwSetWindowTitle(window, title.c_str());
+
 		// glfw: swap buffers and poll events
 		glfwSwapBuffers(window);
 		glfwPollEvents();
