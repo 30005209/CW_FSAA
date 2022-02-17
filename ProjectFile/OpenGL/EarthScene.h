@@ -11,26 +11,42 @@ class EarthScene{
 
 private:
 
-	Sphere						*earthModel;
+	Sphere						*marbleModel0;
+	Sphere						*marbleModel1;
+	Sphere						*marbleModel2;
 
 	// Move around the earth with a seperate camera to the main scene camera
 	Camera						*earthCamera;
 
 	// Textures for multi-texturing the earth model
-	GLuint							dayTexture;
-	GLuint							nightTexture;
-	GLuint							cloudMaskTexture;
+	//GLuint							dayTexture;
+	//GLuint							nightTexture;
+	//GLuint							cloudMaskTexture;
+
+
+	GLuint							marbleTexture0;
+	GLuint							marbleTexture1;
+	GLuint							marbleTexture2;
+	GLuint							marbleTexture3;
 
 	// Shader for multi-texturing the earth
 	GLuint							earthShader;
+	GLuint							marbleShader0;
+	GLuint							marbleShader1;
+	GLuint							marbleShader2;
 
 
 	// Unifom locations for earthShader
 
 	// Texture uniforms
-	GLuint							dayTextureUniform;
-	GLuint							nightTextureUniform;
-	GLuint							maskTextureUniform;
+	//GLuint							dayTextureUniform;
+	//GLuint							nightTextureUniform;
+	//GLuint							maskTextureUniform;
+
+	GLuint							marbleTextureUniform0;
+	GLuint							marbleTextureUniform1;
+	GLuint							marbleTextureUniform2;
+	GLuint							marbleTextureUniform3;
 
 	// Camera uniforms
 	GLint							modelMatrixLocation;
@@ -68,9 +84,12 @@ private:
 	// Flag to indicate that the FBO is valid
 	bool							fboOkay;
 
+	GLuint& shader = marbleShader0;
+	int shaderType;
+
 public:
 
-	EarthScene();
+	EarthScene(int type);
 	~EarthScene();
 
 	// Accessor methods
