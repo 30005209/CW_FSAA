@@ -25,6 +25,10 @@ double lastY = camera_settings.screenHeight / 2.0f;
 bool			showEarthQuad = false;
 EarthScene		*earthScene = nullptr;
 
+int currentSetting = 0;
+int maxSetting = 2;
+TexturedQuad* earthQuad = nullptr;
+
 int main()
 {
 	// glfw: initialize and configure
@@ -82,10 +86,9 @@ int main()
 	//
 	// Earth scene
 	//
-	TexturedQuad	*earthQuad = nullptr;
 	bool			leftCtrlPressed = false;
 
-	earthScene = new EarthScene();
+	earthScene = new EarthScene(0);
 	earthQuad = new TexturedQuad(earthScene->getEarthSceneTexture(), true);
 
 
@@ -159,6 +162,18 @@ void processInput(GLFWwindow *window)
 		camera.processKeyboard(LEFT, timer.getDeltaTimeSeconds());
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.processKeyboard(RIGHT, timer.getDeltaTimeSeconds());
+
+
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+	{
+		currentSetting++;
+		
+		if (currentSetting > maxSetting)
+			currentSetting = 0;
+
+		earthScene = new EarthScene(currentSetting);
+		earthQuad = new TexturedQuad(earthScene->getEarthSceneTexture(), true);
+	}
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

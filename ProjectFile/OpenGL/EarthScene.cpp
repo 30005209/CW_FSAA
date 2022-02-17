@@ -8,14 +8,15 @@ using namespace std;
 
 
 
-EarthScene::EarthScene() {
+EarthScene::EarthScene(int type) {
 
+	shaderType = type;
 	// Camera settings
 	//							  width, heigh, near plane, far plane
 	Camera_settings camera_settings{ 1000, 800, 0.1, 100.0 };
-	
 
-	earthModel = new Sphere(32, 16, 1.0f, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), CG_RIGHTHANDED);
+
+	marbleModel0 = new Sphere(32, 16, 0.5f, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), CG_RIGHTHANDED);
 
 	// Instanciate the camera object with basic data
 	earthCamera = new Camera(camera_settings, glm::vec3(0.0, 0.0, 5.0));
@@ -24,47 +25,60 @@ EarthScene::EarthScene() {
 	// Setup textures for rendering the Earth model
 	//
 
-	dayTexture = TextureLoader::loadTexture(string("Resources\\Models\\Blue Marble\\land_ocean_ice_cloud_2048.bmp"), TextureGenProperties(GL_SRGB8_ALPHA8));
-	nightTexture = TextureLoader::loadTexture(string("Resources\\Models\\Blue Marble\\land_ocean_ice_lights_2048.bmp"), TextureGenProperties(GL_SRGB8_ALPHA8));
-	cloudMaskTexture = TextureLoader::loadTexture(string("Resources\\Models\\Blue Marble\\Clouds.bmp"));
+	marbleTexture0 = TextureLoader::loadTexture(string("Resources\\Models\\Marbles\\Marble0.jpg"), TextureGenProperties(GL_SRGB8_ALPHA8));
+	marbleTexture1 = TextureLoader::loadTexture(string("Resources\\Models\\Marbles\\Marble1.jpg"), TextureGenProperties(GL_SRGB8_ALPHA8));
+	marbleTexture2 = TextureLoader::loadTexture(string("Resources\\Models\\Marbles\\Marble2.jpg"), TextureGenProperties(GL_SRGB8_ALPHA8));
 
+	string vert;
+	string frag;
+	if (shaderType == 0)
+	{
+		vert = "Resources\\Shaders\\Marble0.vert";
+		frag = "Resources\\Shaders\\Marble0.frag";
+		shader = marbleShader0;
+		
+	}
+	else if (shaderType == 1)
+	{
+		vert = "Resources\\Shaders\\Marble1.vert";
+		frag = "Resources\\Shaders\\Marble1.frag";
+		shader = marbleShader1;
+
+
+	}
+	else if (shaderType == 2)
+	{
+		vert = "Resources\\Shaders\\Marble2.vert";
+		frag = "Resources\\Shaders\\Marble2.frag";
+		shader = marbleShader2;
+
+
+	}
 
 	GLSL_ERROR glsl_err = ShaderLoader::createShaderProgram(
-		string("Resources\\Shaders\\Earth-multitexture.vert"),
-		string("Resources\\Shaders\\Earth-multitexture.frag"),
-		&earthShader);
-
+		vert,
+		frag,
+		&shader);
 
 	// Setup uniform locations for shader
 
-	dayTextureUniform = glGetUniformLocation(earthShader, "dayTexture");
-	nightTextureUniform = glGetUniformLocation(earthShader, "nightTexture");
-	maskTextureUniform = glGetUniformLocation(earthShader, "cloudMaskTexture");
+	marbleTextureUniform0 = glGetUniformLocation(shader, "modelTexture");
+	modelMatrixLocation = glGetUniformLocation(shader, "modelMatrix");
+	invTransposeMatrixLocation = glGetUniformLocation(shader, "invTransposeModelMatrix");
+	viewProjectionMatrixLocation = glGetUniformLocation(shader, "viewProjectionMatrix");
+	lightDirectionLocation = glGetUniformLocation(shader, "lightDirection");
+	lightDiffuseLocation = glGetUniformLocation(shader, "lightDiffuseColour");
+	lightSpecularLocation = glGetUniformLocation(shader, "lightSpecularColour");
+	lightSpecExpLocation = glGetUniformLocation(shader, "lightSpecularExponent");
+	cameraPosLocation = glGetUniformLocation(shader, "cameraPos");
 
-	modelMatrixLocation = glGetUniformLocation(earthShader, "modelMatrix");
-
-	invTransposeMatrixLocation = glGetUniformLocation(earthShader, "invTransposeModelMatrix");
-
-	viewProjectionMatrixLocation = glGetUniformLocation(earthShader, "viewProjectionMatrix");
-
-	lightDirectionLocation = glGetUniformLocation(earthShader, "lightDirection");
-
-	lightDiffuseLocation = glGetUniformLocation(earthShader, "lightDiffuseColour");
-
-	lightSpecularLocation = glGetUniformLocation(earthShader, "lightSpecularColour");
-
-	lightSpecExpLocation = glGetUniformLocation(earthShader, "lightSpecularExponent");
-
-	cameraPosLocation = glGetUniformLocation(earthShader, "cameraPos");
 
 
 	// Set constant uniform data (uniforms that will not change while the application is running)
 	// Note: Remember we need to bind the shader before we can set uniform variables!
-	glUseProgram(earthShader);
+	glUseProgram(shader);
 
-	glUniform1i(dayTextureUniform, 0);
-	glUniform1i(nightTextureUniform, 1);
-	glUniform1i(maskTextureUniform, 2);
+	glUniform1i(marbleTextureUniform0, 0);
 
 	glUseProgram(0);
 
@@ -93,7 +107,6 @@ EarthScene::EarthScene() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
 
 	// Setup depth texture
 
@@ -195,7 +208,7 @@ void EarthScene::updateSunTheta(float thetaDelta) {
 void EarthScene::update(const float timeDelta) {
 
 	// Update rotation angle ready for next frame
-	earthTheta += 15.0f * float(timeDelta);
+	earthTheta += 5.0f * float(timeDelta);
 }
 
 
@@ -218,55 +231,87 @@ void EarthScene::render() {
 
 	// Set viewport to specified texture size (see above)
 	glViewport(0, 0, 800, 800);
-	
+
 	// Get view-projection transform as a CGMatrix4
 	glm::mat4 T = earthCamera->getProjectionMatrix() * earthCamera->getViewMatrix();
 
-	if (earthModel) {
+	if (shader)
+	{
+		const int cubeAmount = 3;
+		vector<glm::vec3> cubePositions;
+		cubePositions.reserve(cubeAmount);
 
-		// Modelling transform
-		glm::mat4 modelTransform = glm::rotate(glm::mat4(1.0), glm::radians(23.44f), glm::vec3(0.0, 0.0, 1.0));//Earth tilt
-		modelTransform = glm::rotate(modelTransform, glm::radians(earthTheta), glm::vec3(0.0, 1.0, 0.0));//Earth rotation
+		if (shaderType == 0)
+		{
+			cubePositions.emplace_back(glm::vec3(1.5f, 1.5f, 0.0f));
+			cubePositions.emplace_back(glm::vec3(0.0f, 1.5f, 0.0f));
+			cubePositions.emplace_back(glm::vec3(-1.5f, 1.5f, 0.0f));
+		} 
+		else if(shaderType == 1)
+		{
+			cubePositions.emplace_back(glm::vec3(1.5f, 0.0f, 0.0f));
+			cubePositions.emplace_back(glm::vec3(0.0f, 0.0f, 0.0f));
+			cubePositions.emplace_back(glm::vec3(-1.5f,0.0f, 0.0f));
+		} 
+		else if(shaderType ==2)
+		{
+			cubePositions.emplace_back(glm::vec3(1.5f, -1.5f, 0.0f));
+			cubePositions.emplace_back(glm::vec3(0.0f, -1.5f, 0.0f));
+			cubePositions.emplace_back(glm::vec3(-1.5f,-1.5f, 0.0f));
+		}
 
-		// Calculate inverse transpose of the modelling transform for correct transformation of normal vectors
-		glm::mat4 inverseTranspose = glm::transpose(glm::inverse(modelTransform));;
+		glUseProgram(shader);
 
-		glUseProgram(earthShader);
 
-		// Get the location of the camera in world coords and set the corresponding uniform in the shader
-		glm::vec3 cameraPos = earthCamera->getCameraPosition();
-		glUniform3fv(cameraPosLocation, 1, (GLfloat*)&cameraPos);
 
-		// Set the model, view and projection matrix uniforms (from the camera data obtained above)
-		glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelTransform));
-		glUniformMatrix4fv(invTransposeMatrixLocation, 1, GL_FALSE, glm::value_ptr(inverseTranspose));
-		glUniformMatrix4fv(viewProjectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(T));
+		for (int i = 0; i < 3; i++)
+		{
+			// Modelling transform
+			glm::mat4 modelTransform;
+			modelTransform = glm::rotate(glm::mat4(1.0), glm::radians(23.44f), glm::vec3(0.0, 0.0, 1.0));		//Earth tilt
+			modelTransform = glm::translate(glm::mat4(1.0), cubePositions[i]);									// Move position
+			modelTransform = glm::rotate(modelTransform, glm::radians(earthTheta), glm::vec3(0.0, 1.0, 0.0));	//Earth rotation
 
-		// Set the light direction uniform vector in world coordinates based on the Sun's position
-		glUniform4f(lightDirectionLocation, cosf(glm::radians(sunTheta)), 0.0f, sinf(glm::radians(sunTheta)), 0.0f);
+			// Calculate inverse transpose of the modelling transform for correct transformation of normal vectors
+			glm::mat4 inverseTranspose = glm::transpose(glm::inverse(modelTransform));;
 
-		glUniform4f(lightDiffuseLocation, 1.0f, 1.0f, 1.0f, 1.0f); // white diffuse light
-		glUniform4f(lightSpecularLocation, 0.4f, 0.4f, 0.4f, 1.0f); // white specular light
-		glUniform1f(lightSpecExpLocation, 8.0f); // specular exponent / falloff
+			// Get the location of the camera in world coords and set the corresponding uniform in the shader
+			glm::vec3 cameraPos = earthCamera->getCameraPosition();
+			glUniform3fv(cameraPosLocation, 1, (GLfloat*)&cameraPos);
 
-		// Activate and Bind the textures to texture units
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, dayTexture);
+			// Set the model, view and projection matrix uniforms (from the camera data obtained above)
+			glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelTransform));
+			glUniformMatrix4fv(invTransposeMatrixLocation, 1, GL_FALSE, glm::value_ptr(inverseTranspose));
+			glUniformMatrix4fv(viewProjectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(T));
 
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, nightTexture);
+			// Set the light direction uniform vector in world coordinates based on the Sun's position
+			glUniform4f(lightDirectionLocation, cosf(glm::radians(sunTheta)), 0.0f, sinf(glm::radians(sunTheta)), 0.0f);
 
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, cloudMaskTexture);
+			glUniform4f(lightDiffuseLocation, 1.0f, 1.0f, 1.0f, 1.0f); // white diffuse light
+			glUniform4f(lightSpecularLocation, 0.4f, 0.4f, 0.4f, 1.0f); // white specular light
+			glUniform1f(lightSpecExpLocation, 8.0f); // specular exponent / falloff
 
-		//Render the model
-		earthModel->render();
+			// Activate and Bind the textures to texture units
+			glActiveTexture(GL_TEXTURE0);
+			if(i == 0)
+				glBindTexture(GL_TEXTURE_2D, marbleTexture0);
 
-		// Restore default OpenGL shaders (Fixed function operations)
-		glUseProgram(0);
+			if (i == 1)
+				glBindTexture(GL_TEXTURE_2D, marbleTexture1);
+
+			if (i == 2)
+				glBindTexture(GL_TEXTURE_2D, marbleTexture2);
+
+			//Render the model
+			marbleModel0->render();
+		}
+
 	}
 
+	// Restore default OpenGL shaders (Fixed function operations)
+	glUseProgram(0);
 
 	// Set OpenGL to render to the MAIN framebuffer (ie. the screen itself!!)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 }
