@@ -8,7 +8,7 @@
 #define DETAIL_STRUCTS
 enum SampleSize
 {
-	standard = 0,
+	none = 0,
 	simple = 5,
 	high = 9,
 };
@@ -29,16 +29,13 @@ class EarthScene{
 
 private:
 
-	Sphere						*marbleSphere;
+	Sphere							*marbleSphere;
 
 	// Move around the earth with a seperate camera to the main scene camera
-	Camera						*earthCamera;
-	Camera_settings				camera_settings;
+	Camera							*earthCamera;
+	Camera_settings					camera_settings;
 
 	// Textures for multi-texturing the earth model
-	//GLuint							dayTexture;
-	//GLuint							nightTexture;
-	//GLuint							cloudMaskTexture;
 
 
 	GLuint							marbleTexture0;
@@ -56,14 +53,7 @@ private:
 	// Unifom locations for earthShader
 
 	// Texture uniforms
-	//GLuint							dayTextureUniform;
-	//GLuint							nightTextureUniform;
-	//GLuint							maskTextureUniform;
-
 	GLuint							marbleTextureUniform0;
-	GLuint							marbleTextureUniform1;
-	GLuint							marbleTextureUniform2;
-	GLuint							marbleTextureUniform3;
 
 	// Camera uniforms
 	GLint							modelMatrixLocation;
@@ -76,9 +66,9 @@ private:
 	GLint							lightSpecularLocation;
 	GLint							lightSpecExpLocation;
 	GLint							cameraPosLocation;
-	GLint							blurAmount;
 	GLint							screenWidth;
 	GLint							screenHeight;
+	GLint							sampleSize;
 
 
 	//
@@ -106,10 +96,12 @@ private:
 
 	GLuint& shader = CustomShader;
 	int shaderType;
+	SampleSize sample;
+	Resolution resolution;
 
 public:
 
-	EarthScene(SampleSize _sample = standard, Resolution _resolution = x1);
+	EarthScene(SampleSize _sample, Resolution _resolution);
 	~EarthScene();
 
 	// Accessor methods

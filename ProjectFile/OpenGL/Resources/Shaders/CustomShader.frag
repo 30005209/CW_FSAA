@@ -63,6 +63,7 @@ void main(void) {
 
         if( sampleSize == 5)
         {   
+            // work out offsets
              vec2 offsets[5] = vec2[]
              (
                 vec2(-tx,       ty),    // TL
@@ -72,12 +73,14 @@ void main(void) {
                 vec2( tx,       -ty)    // BR
             );
 
+            //make sure to weight things appropriately
             float weightMatrix[5] = float[](
                 -1,  -1,
                    5,
                 -1,  -1
             );
             
+             // get textures using offsets
             vec3 sampleTex[5];
             for(int i = 0; i < 5; i++)
             {
@@ -86,6 +89,7 @@ void main(void) {
 
             vec3 col = vec3(0.0);
 
+            // obtain colour (with weightMatrix)
             for(int i = 0; i < 5; i++)
                 col += sampleTex[i] * weightMatrix[i];
             
@@ -152,11 +156,7 @@ void main(void) {
 
     vec3 finalColour = dayTime;
 
-    fragColour = vec4(finalColour, 1.0);
     // Output final gamma corrected colour to framebuffer
-   // vec3 P = vec3(1.0 / 2.2);
-   // fragColour = vec4(pow(finalColour, P), 1.0);
-
-    // output final (linear) colour to framebuffer
-	//fragColour = vec4(finalColour, 1.0);
+    vec3 P = vec3(1.0 / 2.2);
+    fragColour = vec4(pow(finalColour, P), 1.0);
 }

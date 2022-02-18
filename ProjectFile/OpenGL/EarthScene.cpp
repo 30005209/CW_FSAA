@@ -10,19 +10,20 @@ using namespace std;
 
 EarthScene::EarthScene(SampleSize _sample, Resolution _resolution)
 {
-
+	sample = _sample;
+	resolution = _resolution;
 	// Camera settings
 	//							  width, heigh, near plane, far plane
 	camera_settings = { 960  * (unsigned int)_resolution, 540 * (unsigned int)_resolution, 0.1, 100.0 };
 
-	marbleSphere = new Sphere(32, 16, 0.1f, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), CG_RIGHTHANDED);
+	marbleSphere = new Sphere(32, 16, 0.10f, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), CG_RIGHTHANDED);
 
 	// Instanciate the camera object with basic data
 	earthCamera = new Camera(camera_settings, glm::vec3(0.0, 0.0, 5.0));
 
 
 	//
-	// Setup textures for rendering the Earth model
+	// Setup textures for rendering the model
 	//
 
 	marbleTexture0 = TextureLoader::loadTexture(string("Resources\\Models\\Marbles\\Marble0.jpg"), TextureGenProperties(GL_SRGB8_ALPHA8));
@@ -46,9 +47,9 @@ EarthScene::EarthScene(SampleSize _sample, Resolution _resolution)
 	lightSpecularLocation = glGetUniformLocation(shader, "lightSpecularColour");
 	lightSpecExpLocation = glGetUniformLocation(shader, "lightSpecularExponent");
 	cameraPosLocation = glGetUniformLocation(shader, "cameraPos");
-	blurAmount = glGetUniformLocation(shader, "blurAmount");
 	screenWidth = glGetUniformLocation(shader, "screenWidth");
 	screenHeight = glGetUniformLocation(shader, "screenHeight");
+	sampleSize = glGetUniformLocation(shader, "sampleSize");
 	
 	// Set constant uniform data (uniforms that will not change while the application is running)
 	// Note: Remember we need to bind the shader before we can set uniform variables!
@@ -65,7 +66,7 @@ EarthScene::EarthScene(SampleSize _sample, Resolution _resolution)
 
 	glGenFramebuffers(1, &demoFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, demoFBO);
-
+	
 
 	//
 	// Setup textures that will be drawn into through the FBO
@@ -81,7 +82,7 @@ EarthScene::EarthScene(SampleSize _sample, Resolution _resolution)
 	glBindTexture(GL_TEXTURE_2D, fboColourTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, camera_settings.screenWidth, camera_settings.screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
-	if (shaderType >= 2)
+	if (sample != 0)
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -100,7 +101,7 @@ EarthScene::EarthScene(SampleSize _sample, Resolution _resolution)
 	glBindTexture(GL_TEXTURE_2D, fboDepthTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, camera_settings.screenWidth, camera_settings.screenHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
 
-	if (shaderType >= 2)
+	if (sample != 0)
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -152,8 +153,7 @@ EarthScene::EarthScene(SampleSize _sample, Resolution _resolution)
 
 	// Unbind FBO for now! (Plug main framebuffer back in as rendering destination)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
+	glBlitFramebuffer(0, 0, camera_settings.screenWidth, camera_settings.screenHeight, 0, 0, camera_settings.screenWidth, camera_settings.screenHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 	//
 	// Setup demo / animation variables
@@ -199,8 +199,8 @@ void EarthScene::updateSunTheta(float thetaDelta) {
 void EarthScene::update(const float timeDelta) {
 
 	// Update rotation angle ready for next frame
-	earthTheta += 5.0f * float(timeDelta); 
-	updateSunTheta(timeDelta * 5.0f);
+	//earthTheta += 5.0f * float(timeDelta); 
+	//updateSunTheta(timeDelta * 5.0f);
 	marbleSphere->render();
 }
 
@@ -238,10 +238,10 @@ void EarthScene::render() {
 
 		for (int i = 0; i < 40; i++)
 		{
-			float y = 3 - (i * 0.2f);
+			float y = 3 - (i * 0.1f);
 			for (int j = 0; j < 40; j++)
 			{
-				float x = -4 + (j * 0.2f);
+				float x = -4 + (j * 0.1f);
 				cubePositions.emplace_back(glm::vec3(x, y, 0.0f));
 			}
 		}
@@ -275,9 +275,9 @@ void EarthScene::render() {
 			glUniform4f(lightDiffuseLocation, 1.0f, 1.0f, 1.0f, 1.0f); // white diffuse light
 			glUniform4f(lightSpecularLocation, 0.4f, 0.4f, 0.4f, 1.0f); // white specular light
 			glUniform1f(lightSpecExpLocation, 8.0f); // specular exponent / falloff
-			glUniform1f(blurAmount, 8.0f); // specular exponent / falloff
 			glUniform1f(screenWidth, (float)camera_settings.screenWidth); // specular exponent / falloff
 			glUniform1f(screenHeight, (float)camera_settings.screenHeight); // specular exponent / falloff
+			glUniform1f(sampleSize, (GLfloat)sample); // specular exponent / falloff
 
 			// Activate and Bind the textures to texture units
 			glActiveTexture(GL_TEXTURE0);

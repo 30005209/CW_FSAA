@@ -33,7 +33,7 @@ TexturedQuad* earthQuad = nullptr;
 #define DETAIL_STRUCTS
 enum SampleSize
 {
-	standard = 0,
+	none = 0,
 	simple = 5,
 	high = 9,
 };
@@ -54,7 +54,7 @@ Resolution resolution;
 
 int main()
 {
-	sample = standard;
+	sample = none;
 	resolution = x1;
 
 	// glfw: initialize and configure
@@ -63,7 +63,6 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
 
 	// glfw window creation
 	GLFWwindow* window = glfwCreateWindow(camera_settings.screenWidth, camera_settings.screenHeight, "Real-Time Rendering: DEMO 3", NULL, NULL);
@@ -114,9 +113,13 @@ int main()
 	//
 	bool			leftCtrlPressed = false;
 
+	
+	glEnable(GL_MULTISAMPLE);				// Comment out for non sampling
+	glfwWindowHint(GLFW_SAMPLES, 10000);	// Comment out for non sampling
+	sample = none;							// Change for sampling amount
+	resolution = x1;						// change for resolution
 	earthScene = new EarthScene(sample, resolution);
 	earthQuad = new TexturedQuad(earthScene->getEarthSceneTexture(), true);
-
 
 	// render loop
 	while (!glfwWindowShouldClose(window))
@@ -196,7 +199,7 @@ void processInput(GLFWwindow* window)
 	int setting0 = sample;
 
 	if (glfwGetKey(window, GLFW_KEY_KP_0) == GLFW_PRESS)
-		sample = standard;
+		sample = none;
 
 	if (glfwGetKey(window, GLFW_KEY_KP_7) == GLFW_PRESS)
 		sample = simple;
@@ -229,16 +232,16 @@ void processInput(GLFWwindow* window)
 		earthScene = new EarthScene(sample, resolution);
 		earthQuad = new TexturedQuad(earthScene->getEarthSceneTexture(), true);
 
-		if (sample == standard)
-		{
-			glDisable(GL_MULTISAMPLE);
-		}
-		else
-		{
-			glEnable(GL_MULTISAMPLE);
-			glfwWindowHint(GLFW_SAMPLES, 4);
-		}
-
+		// Comment / uncomment if changes are desired to be made at runtime
+		// if (sample == none)
+		// {
+		// 	glDisable(GL_MULTISAMPLE);
+		// }
+		// else
+		// {
+		// 	glEnable(GL_MULTISAMPLE);
+		// 	glfwWindowHint(GLFW_SAMPLES, 10000);
+		// }
 	}
 }
 
