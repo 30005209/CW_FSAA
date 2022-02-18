@@ -52,30 +52,34 @@ void main(void) {
 
     vec4 texColour = texture(modelTexture, vec2(texCoord.x, texCoord.y));
 
-     vec2 offsets[5] = vec2[]
+     vec2 offsets[9] = vec2[]
      (
         vec2(-tx,       ty),    // top-left
+        vec2( 0.0f,     ty),    // top-center
         vec2( tx,       ty),    // top-right
+        vec2(-tx,       0.0f),  // center-left
         vec2( 0.0f,     0.0f),  // center-center
+        vec2( tx,       0.0f),  // center-right
         vec2(-tx,      -ty),    // bottom-left
+        vec2( 0.0f,     -ty),   // bottom-center
         vec2( tx,       -ty)    // bottom-right    
     );
 
-    float kernel[5] = float[](
-        -1,  -1,
-           5,
-        -1,  -1
+    float kernel[9] = float[](
+        -1, -1, -1,
+        -1,  9, -1,
+        -1, -1, -1
     );
     
-    vec3 sampleTex[5];
-    for(int i = 0; i < 5; i++)
+    vec3 sampleTex[9];
+    for(int i = 0; i < 9; i++)
     {
         sampleTex[i] = vec3(texture(modelTexture, texCoord.st + offsets[i]));
     }
 
     vec3 col = vec3(0.0);
 
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < 9; i++)
         col += sampleTex[i] * kernel[i];
     
     vec3 diffuseColour = col.rgb * lightDiffuseColour.rgb * lambertian; // input colour actually diffuse colour
