@@ -8,14 +8,14 @@ using namespace std;
 
 
 
-EarthScene::EarthScene(int type) {
+EarthScene::EarthScene(SampleSize _sample, Resolution _resolution)
+{
 
-	shaderType = type;
 	// Camera settings
 	//							  width, heigh, near plane, far plane
-	camera_settings = { 1000, 800, 0.1, 100.0 };
+	camera_settings = { 960  * (unsigned int)_resolution, 540 * (unsigned int)_resolution, 0.1, 100.0 };
 
-	marbleModel0 = new Sphere(32, 16, 0.1f, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), CG_RIGHTHANDED);
+	marbleSphere = new Sphere(32, 16, 0.1f, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), CG_RIGHTHANDED);
 
 	// Instanciate the camera object with basic data
 	earthCamera = new Camera(camera_settings, glm::vec3(0.0, 0.0, 5.0));
@@ -31,50 +31,11 @@ EarthScene::EarthScene(int type) {
 
 
 	GLSL_ERROR glsl_err = ShaderLoader::createShaderProgram(
-		"Resources\\Shaders\\Marble0.vert",
-		"Resources\\Shaders\\Marble0.frag",
-		&marbleShader0);
+		"Resources\\Shaders\\CustomShader.vert",
+		"Resources\\Shaders\\CustomShader.frag",
+		&CustomShader);
 
-	ShaderLoader::createShaderProgram(
-		"Resources\\Shaders\\Marble1.vert",
-		"Resources\\Shaders\\Marble1.frag",
-		&marbleShader1);
-
-	ShaderLoader::createShaderProgram(
-		"Resources\\Shaders\\Marble2.vert",
-		"Resources\\Shaders\\Marble2.frag",
-		&marbleShader2);
-
-
-	ShaderLoader::createShaderProgram(
-		"Resources\\Shaders\\Marble3.vert",
-		"Resources\\Shaders\\Marble3.frag",
-		&marbleShader3);
-
-	// Setup uniform locations for shader
-	
-	switch (shaderType)
-	{
-	case 0:
-		shader = marbleShader0;
-		camera_settings = { 960, 540, 0.1, 100.0 };
-		break;
-
-	case 1:
-		shader = marbleShader1;
-		camera_settings = { 1920, 1080, 0.1, 100.0 };
-		break;
-
-	case 2:
-		shader = marbleShader2;
-		camera_settings = { 1920, 1080, 0.1, 100.0 };
-		break;	
-	
-	case 3:
-		shader = marbleShader3;
-		camera_settings = { 1920, 1080, 0.1, 100.0 };
-		break;
-	}
+	shader = CustomShader;
 
 	marbleTextureUniform0 = glGetUniformLocation(shader, "modelTexture");
 	modelMatrixLocation = glGetUniformLocation(shader, "modelMatrix");
@@ -116,11 +77,6 @@ EarthScene::EarthScene(int type) {
 	//we're going to fill in the image when we render the Earth scene at render time!
 	
 	glGenTextures(1, &fboColourTexture);
-	// Setup colour buffer texture.
-	// Note:  The texture is stored as linear RGB values (GL_RGBA8).  
-	//There is no need to pass a pointer to image data - 
-	//we're going to fill in the image when we render the Earth scene at render time!
-
 
 	glBindTexture(GL_TEXTURE_2D, fboColourTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, camera_settings.screenWidth, camera_settings.screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -245,7 +201,7 @@ void EarthScene::update(const float timeDelta) {
 	// Update rotation angle ready for next frame
 	earthTheta += 5.0f * float(timeDelta); 
 	updateSunTheta(timeDelta * 5.0f);
-	marbleModel0->render();
+	marbleSphere->render();
 }
 
 
@@ -285,7 +241,7 @@ void EarthScene::render() {
 			float y = 3 - (i * 0.2f);
 			for (int j = 0; j < 40; j++)
 			{
-				float x = -3 + (j * 0.2f);
+				float x = -4 + (j * 0.2f);
 				cubePositions.emplace_back(glm::vec3(x, y, 0.0f));
 			}
 		}
@@ -342,7 +298,7 @@ void EarthScene::render() {
 			}
 
 			//Render the model
-			marbleModel0->render();
+			marbleSphere->render();
 		}
 
 	}

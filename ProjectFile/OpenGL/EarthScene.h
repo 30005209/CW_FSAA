@@ -4,6 +4,24 @@
 #include "Sphere.h"
 #include "Camera.h"
 
+#ifndef DETAIL_STRUCTS
+#define DETAIL_STRUCTS
+enum SampleSize
+{
+	standard = 0,
+	simple = 5,
+	high = 9,
+};
+
+enum Resolution
+{
+	x1 = 1,
+	x2 = 2,
+	x3 = 3,
+	x4 = 4
+};
+
+#endif DETAIL_STRUCTS
 
 class Sphere;
 
@@ -11,7 +29,7 @@ class EarthScene{
 
 private:
 
-	Sphere						*marbleModel0;
+	Sphere						*marbleSphere;
 
 	// Move around the earth with a seperate camera to the main scene camera
 	Camera						*earthCamera;
@@ -29,7 +47,7 @@ private:
 
 	// Shader for multi-texturing the earth
 	GLuint							earthShader;
-	GLuint							marbleShader0;
+	GLuint							CustomShader;
 	GLuint							marbleShader1;
 	GLuint							marbleShader2;
 	GLuint							marbleShader3;
@@ -86,12 +104,12 @@ private:
 	// Flag to indicate that the FBO is valid
 	bool							fboOkay;
 
-	GLuint& shader = marbleShader0;
+	GLuint& shader = CustomShader;
 	int shaderType;
 
 public:
 
-	EarthScene(int type);
+	EarthScene(SampleSize _sample = standard, Resolution _resolution = x1);
 	~EarthScene();
 
 	// Accessor methods

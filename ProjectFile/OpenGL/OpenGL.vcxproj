@@ -158,6 +158,8 @@
   <ItemGroup>
     <None Include="Resources\Shaders\Basic_shader.frag" />
     <None Include="Resources\Shaders\Basic_shader.vert" />
+    <None Include="Resources\Shaders\CustomShader.frag" />
+    <None Include="Resources\Shaders\CustomShader.vert" />
     <None Include="Resources\Shaders\Earth-multitexture.frag" />
     <None Include="Resources\Shaders\Earth-multitexture.vert" />
     <None Include="Resources\Shaders\Marble0.frag" />

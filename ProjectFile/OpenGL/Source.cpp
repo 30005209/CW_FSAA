@@ -29,8 +29,34 @@ int currentSetting = 0;
 int maxSetting = 3;
 TexturedQuad* earthQuad = nullptr;
 
+#ifndef DETAIL_STRUCTS
+#define DETAIL_STRUCTS
+enum SampleSize
+{
+	standard = 0,
+	simple = 5,
+	high = 9,
+};
+
+enum Resolution
+{
+	x1 = 1,
+	x2 = 2,
+	x3 = 3,
+	x4 = 4
+};
+
+#endif DETAIL_STRUCTS
+
+
+SampleSize sample;
+Resolution resolution;
+
 int main()
 {
+	sample = standard;
+	resolution = x1;
+
 	// glfw: initialize and configure
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -88,7 +114,7 @@ int main()
 	//
 	bool			leftCtrlPressed = false;
 
-	earthScene = new EarthScene(0);
+	earthScene = new EarthScene(sample, resolution);
 	earthQuad = new TexturedQuad(earthScene->getEarthSceneTexture(), true);
 
 
@@ -151,7 +177,7 @@ int main()
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow* window)
 {
 	timer.updateDeltaTime();
 
@@ -167,25 +193,50 @@ void processInput(GLFWwindow *window)
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.processKeyboard(RIGHT, timer.getDeltaTimeSeconds());
 
+	int setting0 = sample;
+
+	if (glfwGetKey(window, GLFW_KEY_KP_0) == GLFW_PRESS)
+		sample = standard;
+
+	if (glfwGetKey(window, GLFW_KEY_KP_7) == GLFW_PRESS)
+		sample = simple;
+
+	if (glfwGetKey(window, GLFW_KEY_KP_8) == GLFW_PRESS)
+		sample = high;
+
+
+	int setting1 = resolution;
+
+	if (glfwGetKey(window, GLFW_KEY_KP_1) == GLFW_PRESS)
+		resolution = x1;
+
+	if (glfwGetKey(window, GLFW_KEY_KP_2) == GLFW_PRESS)
+		resolution = x2;
+
+	if (glfwGetKey(window, GLFW_KEY_KP_3) == GLFW_PRESS)
+		resolution = x3;
+
+	if (glfwGetKey(window, GLFW_KEY_KP_4) == GLFW_PRESS)
+		resolution = x4;
+
+	if (setting0 != sample || setting1 != resolution)
+	{
+		cout << "--New Settings--\nSample Size: " << sample << "\nResolution: " << resolution << "\n\n";
+	}
 
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 	{
-		currentSetting++;
-		
-		if (currentSetting > maxSetting)
-			currentSetting = 0;
-
-		earthScene = new EarthScene(currentSetting);
+		earthScene = new EarthScene(sample, resolution);
 		earthQuad = new TexturedQuad(earthScene->getEarthSceneTexture(), true);
 
-		if (currentSetting > 0)
+		if (sample == standard)
 		{
-			glEnable(GL_MULTISAMPLE);
-			glfwWindowHint(GLFW_SAMPLES, 4);
+			glDisable(GL_MULTISAMPLE);
 		}
 		else
 		{
-			glDisable(GL_MULTISAMPLE);
+			glEnable(GL_MULTISAMPLE);
+			glfwWindowHint(GLFW_SAMPLES, 4);
 		}
 
 	}
