@@ -14,6 +14,9 @@ uniform vec3        cameraPos; // to calculate specular lighting in world coordi
 
 uniform sampler2D modelTexture;
 
+uniform float screenWidth;
+uniform float screenHeight;
+
 //
 // input fragment packet (contains interpolated values for the fragment calculated by the rasteriser)
 //
@@ -28,7 +31,8 @@ in vec2 texCoord;
 layout (location = 0) out vec4 fragColour;
 
 
-void main(void) {
+void main(void) 
+{
 
 	// make sure light direction vector is unit length (store in L)
 	vec4 L = normalize(lightDirection);
@@ -42,7 +46,8 @@ void main(void) {
 
     //
 	// calculate diffuse light colour
-    vec4 texColour = texture(modelTexture, texCoord);
+    vec4 texColour = texture(modelTexture, vec2(texCoord.x, texCoord.y));
+
     vec3 diffuseColour = texColour.rgb * lightDiffuseColour.rgb * lambertian; // input colour actually diffuse colour
 
     //
@@ -67,6 +72,7 @@ void main(void) {
     vec3 finalColour = dayTime;
     
     fragColour = vec4(finalColour, 1.0);
+
     // Output final gamma corrected colour to framebuffer
    // vec3 P = vec3(1.0 / 2.2);
    // fragColour = vec4(pow(finalColour, P), 1.0);

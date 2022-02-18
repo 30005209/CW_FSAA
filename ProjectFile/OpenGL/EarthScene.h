@@ -12,11 +12,10 @@ class EarthScene{
 private:
 
 	Sphere						*marbleModel0;
-	Sphere						*marbleModel1;
-	Sphere						*marbleModel2;
 
 	// Move around the earth with a seperate camera to the main scene camera
 	Camera						*earthCamera;
+	Camera_settings				camera_settings;
 
 	// Textures for multi-texturing the earth model
 	//GLuint							dayTexture;
@@ -27,13 +26,13 @@ private:
 	GLuint							marbleTexture0;
 	GLuint							marbleTexture1;
 	GLuint							marbleTexture2;
-	GLuint							marbleTexture3;
 
 	// Shader for multi-texturing the earth
 	GLuint							earthShader;
 	GLuint							marbleShader0;
 	GLuint							marbleShader1;
 	GLuint							marbleShader2;
+	GLuint							marbleShader3;
 
 
 	// Unifom locations for earthShader
@@ -59,6 +58,9 @@ private:
 	GLint							lightSpecularLocation;
 	GLint							lightSpecExpLocation;
 	GLint							cameraPosLocation;
+	GLint							blurAmount;
+	GLint							screenWidth;
+	GLint							screenHeight;
 
 
 	//

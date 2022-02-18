@@ -11,7 +11,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 // Camera settings
 //							  width, height, near plane, far plane
-Camera_settings camera_settings{ 1000, 800, 0.1, 100.0 };
+Camera_settings camera_settings{ 960, 540, 0.1, 100.0 };
 
 //Timer
 Timer timer;
@@ -26,7 +26,7 @@ bool			showEarthQuad = false;
 EarthScene		*earthScene = nullptr;
 
 int currentSetting = 0;
-int maxSetting = 2;
+int maxSetting = 3;
 TexturedQuad* earthQuad = nullptr;
 
 int main()
@@ -101,9 +101,9 @@ int main()
 
 		// This demo performs 2 rendering passes...
 		// Pass 1) Render the Earth scene to a texture
+
 		// Pass 2) Render the basic demo scene with the principle axes and textured quad, where the texture on the quad is the Earth scene rendered in pass 1.
-
-
+	
 		//
 		// Pass 1. Render the Earth scene
 		//
@@ -115,8 +115,9 @@ int main()
 		//
 
 		// Clear the screen
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
 		//Reset the viewport
 		int width, height;
