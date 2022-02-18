@@ -116,8 +116,8 @@ int main()
 	
 	glEnable(GL_MULTISAMPLE);				// Comment out for non sampling
 	glfwWindowHint(GLFW_SAMPLES, 10000);	// Comment out for non sampling
-	sample = none;							// Change for sampling amount
-	resolution = x1;						// change for resolution
+	sample = high;							// Change for sampling amount
+	resolution = x2;						// change for resolution
 	earthScene = new EarthScene(sample, resolution);
 	earthQuad = new TexturedQuad(earthScene->getEarthSceneTexture(), true);
 

@@ -82,7 +82,7 @@ EarthScene::EarthScene(SampleSize _sample, Resolution _resolution)
 	glBindTexture(GL_TEXTURE_2D, fboColourTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, camera_settings.screenWidth, camera_settings.screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
-	if (sample != 0)
+	if (sample != none)
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -101,7 +101,7 @@ EarthScene::EarthScene(SampleSize _sample, Resolution _resolution)
 	glBindTexture(GL_TEXTURE_2D, fboDepthTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, camera_settings.screenWidth, camera_settings.screenHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
 
-	if (sample != 0)
+	if (sample != none)
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
